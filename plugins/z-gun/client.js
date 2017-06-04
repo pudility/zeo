@@ -12,6 +12,8 @@ class ZGun {
   mount() {
     const {three: {THREE, scene}, input, elements, render, pose, utils: {geometry: geometryUtils}} = zeo;
 
+    return;
+
     let live = true;
     this._cleanup = () => {
       live = false;

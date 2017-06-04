@@ -128,7 +128,7 @@ class Grid {
             const material = new THREE.MeshPhongMaterial({
               map: mapTexture,
               shininess: 10,
-              wireframe: true,
+              // wireframe: true,
             });
 
             const mesh = new THREE.Mesh(geometry, material);

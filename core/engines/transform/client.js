@@ -379,6 +379,8 @@ class Transform {
           input.on('triggerup', _triggerup);
 
           const _update = () => {
+            return;
+
             SIDES.forEach(side => {
               const dragState = dragStates[side];
               const {src} = dragState;

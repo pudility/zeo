@@ -6,6 +6,7 @@ const PORTAL_BORDER_SIZE = PORTAL_SIZE * 0.01;
 class Mirror {
   mount() {
     const {three: {THREE, scene, camera, renderer}, elements, render, pose, utils: {geometry: geometryUtils}} = zeo;
+    return;
 
     const THREEMirror = ThreeExtraMirror(THREE);
 

@@ -166,6 +166,8 @@ class Config {
         const stats = new Stats();
         stats.render = () => {}; // overridden below
         const statsDom = stats.dom.childNodes[0];
+// statsDom.style.cssText = 'position: absolute; top: 0; left: 0;';
+// document.body.appendChild(statsDom);
 
         const configMesh = (() => {
           const object = new THREE.Object3D();
@@ -238,7 +240,8 @@ class Config {
           const object = new THREE.Object3D();
           object.position.x = -(2 / 2) + (STATS_WORLD_WIDTH / 2);
           object.position.y = -((2 / 1.5) / 2) + (STATS_WORLD_HEIGHT / 2);
-          object.visible = configState.statsCheckboxValue;
+          // object.visible = configState.statsCheckboxValue;
+          object.visible = false;
 
           const planeMesh = (() => {
             const statsUi = biolumi.makeUi({
@@ -291,7 +294,7 @@ class Config {
         rend.registerMenuMesh('statsMesh', statsMesh);
 
         stats.render = () => {
-          const {frame: oldFrame} = statsState;
+          /* const {frame: oldFrame} = statsState;
           const newFrame = Math.floor(Date.now() / STATS_REFRESH_RATE);
 
           if (newFrame !== oldFrame) {
@@ -300,7 +303,7 @@ class Config {
             const {planeMesh} = statsMesh;
             const {page} = planeMesh;
             page.update();
-          }
+          } */
         };
 
         const _updatePages = () => {

@@ -23,6 +23,8 @@ class ZFighter {
   mount() {
     const {three: {THREE, scene, camera}, elements, input, pose, render, sound, ui, payment, utils: {geometry: geometryUtils}} = zeo;
 
+    return;
+
     let live = true;
     this.cleanup = () => {
       live = false;
@@ -467,7 +469,6 @@ class ZFighter {
                   worldWidth: WORLD_WIDTH,
                   worldHeight: WORLD_HEIGHT,
                 });
-                // mesh.rotation.order = camera.rotation.order;
                 mesh.visible = _isEnabled();
 
                 const _align = (position, rotation, scale, lerpFactor) => {

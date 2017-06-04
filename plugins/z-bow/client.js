@@ -14,6 +14,8 @@ class ZBow {
   mount() {
     const {three: {THREE, scene}, input, elements, render, pose, player, utils: {geometry: geometryUtils}} = zeo;
 
+    return;
+
     const _decomposeObjectMatrixWorld = object => _decomposeMatrix(object.matrixWorld);
     const _decomposeMatrix = matrix => {
       const position = new THREE.Vector3();
@@ -166,6 +168,8 @@ class ZBow {
               new THREE.Vector3(0, 0, -1),
               pullAngle
             );
+
+            arrowMesh.updateMatrixWorld();
           };
 
           return arrowMesh;
@@ -390,6 +394,7 @@ class ZBow {
                   backVector,
                   velocity.clone().normalize()
                 );
+                arrow.updateMatrixWorld();
                 velocity.y = Math.max(velocity.y + (ARROW_GRAVITY * timeDiff), ARROW_TERMINAL_VELOCITY);
 
                 arrow.lastTime = now;

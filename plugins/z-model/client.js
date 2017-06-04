@@ -2,6 +2,8 @@ class Model {
   mount() {
     const {three: {THREE}, elements} = zeo;
 
+    return;
+
     const modelComponent = {
       selector: 'model[position][src]',
       attributes: {

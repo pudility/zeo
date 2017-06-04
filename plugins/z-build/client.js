@@ -23,6 +23,8 @@ class ZBuild {
     const {network: networkUtils, geometry: geometryUtils, menu: menuUtils} = utils;
     const {AutoWs} = networkUtils;
 
+    return;
+
     const targetPlaneImg = menuUtils.getTargetPlaneImg();
     const colorWheelImg = menuUtils.getColorWheelImg();
 
@@ -1022,7 +1024,7 @@ class ZBuild {
           },
         ];
         const _update = () => {
-          const _updateGrabs = () => {
+          /* const _updateGrabs = () => {
             const {gamepads} = pose.getStatus();
 
             SIDES.forEach(side => {
@@ -1135,7 +1137,7 @@ class ZBuild {
           };
 
           _updateGrabs();
-          _updateShapeControls();
+          _updateShapeControls(); */
         };
         render.on('update', _update);
 
