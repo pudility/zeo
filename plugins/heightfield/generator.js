@@ -208,21 +208,25 @@ const _generateMapChunk = (ox, oy, opts) => {
   // generate
 
   let biomes = opts.oldBiomes;
+  let fillBiomes = false;
   if (!biomes) {
     biomes = slab.biomes;
-    noiser.fillBiomes(ox, oy, biomes);
+    fillBiomes = true;
   }
 
   let elevations = opts.oldElevations;
+  let fillElevations = false;
   if (!elevations) {
     elevations = slab.elevations;
-    noiser.fillElevations(ox, oy, elevations);
+    fillElevations = true;
   }
 
   let ether = opts.oldEther;
+  let fillEther = false;
   if (!ether) {
     ether = slab.ether;
-    noiser.fillEther(elevations, ether);
+    // noiser.fillEther(elevations, ether);
+    fillEther = true;
 
     /* let index = 0;
     for (let z = 0; z < NUM_CELLS_OVERSCAN; z++) {
@@ -322,16 +326,23 @@ const _generateMapChunk = (ox, oy, opts) => {
 
   let water = opts.oldWater;
   let lava = opts.oldLava;
+  let fillLiquid = false;
   if (!water || !lava) {
     water = slab.water;
     lava = slab.lava;
-
-    noiser.fillLiquid(ox, oy, ether, elevations, water, lava);
+    fillLiquid = true;
   }
 
+  let newEther;
+  let numNewEthers = 0;
   if (opts.newEther && opts.newEther.length > 0) {
-    noiser.applyEther(opts.newEther, opts.newEther.length, ether);
+    newEther = opts.newEther;
+    numNewEthers = opts.newEther.length;
+  } else {
+    newEther = new Float32Array(0);
   }
+
+  noiser.fill(ox, oy, biomes, fillBiomes, elevations, fillElevations, ether, fillEther, water, lava, fillLiquid, newEther, numNewEthers);
 
   // compile
 
@@ -379,7 +390,6 @@ const _generateMapChunk = (ox, oy, opts) => {
     lava,
   };
 };
-// const _getEtherIndex = (x, y, z) => x + (z * NUM_CELLS_OVERSCAN) + (y * NUM_CELLS_OVERSCAN * NUM_CELLS_OVERSCAN);
 
 const generate = (x, y, opts = {}) => _generateMapChunk(x, y, opts);
 

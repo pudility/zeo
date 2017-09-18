@@ -8,6 +8,13 @@ importScripts('/archae/assets/alea.js');
 const {exports: alea} = self.module;
 self.module = {};
 
+Module = {
+  print: function(text) { console.log(text); },
+  printErr: function(text) { console.warn(text); },
+  wasmBinaryFile: '/archae/objects/objectize.wasm',
+};
+importScripts('/archae/objects/objectize.js');
+
 const zeode = require('zeode');
 const {
   OBJECT_BUFFER_SIZE,
@@ -53,6 +60,20 @@ const bodyOffsetVector = new THREE.Vector3(0, -1.6 / 2, 0);
 
 let textureAtlasVersion = '';
 const objectApis = {};
+
+const _makeGeometeriesBuffer = (() => {
+  const slab = new ArrayBuffer(GEOMETRY_BUFFER_SIZE * NUM_CHUNKS_HEIGHT * 7);
+  let index = 0;
+  const result = constructor => {
+    const result = new constructor(slab, index, (GEOMETRY_BUFFER_SIZE * NUM_CHUNKS_HEIGHT) / constructor.BYTES_PER_ELEMENT);
+    index += GEOMETRY_BUFFER_SIZE * NUM_CHUNKS_HEIGHT;
+    return result;
+  };
+  result.reset = () => {
+    index = 0;
+  };
+  return result;
+})();
 
 class TrackedObject {
   constructor(n, position, rotation, value) {
@@ -458,6 +479,16 @@ connection.clearBlock = (x, y, z, cb) => {
     },
   }));
   queues[id] = cb;
+};
+const _resArrayBuffer = res => {
+  if (res.status >= 200 && res.status < 300) {
+    return res.arrayBuffer();
+  } else {
+    return Promise.reject({
+      status: res.status,
+      stack: 'API returned invalid status code: ' + res.status,
+    });
+  }
 };
 const _resArrayBufferHeaders = res => {
   if (res.status >= 200 && res.status < 300) {
@@ -912,6 +943,71 @@ self.onmessage = e => {
       const oldChunk = zde.getChunk(ox, oz);
       if (oldChunk) {
         connection.clearBlock(x, y, z, () => {
+          fetch(`/archae/objects/templates.dat`, {
+            credentials: 'include',
+          })
+            .then(_resArrayBuffer)
+            .then(arrayBuffer => {
+              const {geometriesBuffer, geometryTypes, blockTypes, transparentVoxels, translucentVoxels, faceUvs} = protocolUtils.parseTemplates(arrayBuffer);
+
+              const _alloc = b => {
+                const offset = Module._malloc(b.byteLength);
+                new b.constructor(Module.HEAP8.buffer, Module.HEAP8.byteOffset + offset).set(b);
+                return offset;
+              };
+              const _unalloc = offset => new Module.HEAP32.subarray(offset);
+
+              _makeGeometeriesBuffer.reset();
+              const geometriesPositions = _makeGeometeriesBuffer(Float32Array);
+              const geometriesUvs = _makeGeometeriesBuffer(Float32Array);
+              const geometriesSsaos = _makeGeometeriesBuffer(Uint8Array);
+              const geometriesFrames = _makeGeometeriesBuffer(Float32Array);
+              const geometriesObjectIndices = _makeGeometeriesBuffer(Float32Array);
+              const geometriesIndices = _makeGeometeriesBuffer(Uint32Array);
+              const geometriesObjects = _makeGeometeriesBuffer(Uint32Array);
+
+              console.log('objectize 1');
+
+              const resultSize = 7 * 8;
+              const resultOffset = Module._malloc(resultSize * 4);
+              const result = new Uint32Array(Module.HEAP8.buffer, Module.HEAP8.byteOffset + resultOffset, resultSize);
+              Module._objectize(
+                _alloc(oldChunk.getObjectBuffer()),
+                _alloc(geometriesBuffer),
+                _alloc(geometryTypes),
+                _alloc(oldChunk.getBlockBuffer()),
+                _alloc(blockTypes),
+                _alloc(Int32Array.from([NUM_CELLS, NUM_CELLS, NUM_CELLS])),
+                _alloc(transparentVoxels),
+                _alloc(translucentVoxels),
+                _alloc(faceUvs),
+                _alloc(Float32Array.from([x * NUM_CELLS, 0, z * NUM_CELLS])),
+                _alloc(geometriesPositions),
+                _alloc(geometriesUvs),
+                _alloc(geometriesSsaos),
+                _alloc(geometriesFrames),
+                _alloc(geometriesObjectIndices),
+                _alloc(geometriesIndices),
+                _alloc(geometriesObjects),
+                resultOffset
+              );
+              console.log('got result', Array.from(result));
+              /* {
+                positions: numNewPositions,
+                uvs: numNewUvs,
+                ssaos: numNewSsaos,
+                frames: numNewFrames,
+                objectIndices: numNewObjectIndices,
+                indices: numNewIndices,
+                objects: numNewObjects,
+              } */
+
+              console.log('objectize 2');
+            })
+            .catch(err => {
+              console.warn(err);
+            });
+
           const {offsets: {index, numPositions, numObjectIndices, numIndices}} = oldChunk;
           _requestChunk(ox, oz, index, numPositions, numObjectIndices, numIndices)
             .then(newChunk => {

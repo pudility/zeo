@@ -5,6 +5,7 @@ const dataSymbol = Symbol();
 
 class Mobs {
   mount() {
+    return;
     const {three, pose, elements, input, render, stage, sound, utils: {network: networkUtils, random: randomUtils, skin: skinUtils}} = zeo;
     const {THREE} = three;
     const {AutoWs} = networkUtils;

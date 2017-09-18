@@ -58,8 +58,8 @@ class Objects {
         const rng = new alea(DEFAULT_SEED);
         const heightfields = {}; // XXX these should be LRU caches
         const biomes = {};
-        const geometryTypes = new Uint32Array(4096);
         const geometriesBuffer = new Uint8Array(NUM_POSITIONS_CHUNK);
+        const geometryTypes = new Uint32Array(4096);
         let geometriesIndex = 0;
         let geometriesOffset = 0;
         const noises = {};
@@ -590,7 +590,28 @@ class Objects {
                     }
                   });
                 }
-                app.use('/archae/objects/texture-atlas.png', serveObjectsTextureAtlas);
+                app.get('/archae/objects/texture-atlas.png', serveObjectsTextureAtlas);
+
+                function serveObjectsObjectizeJs(req, res, next) {
+                  res.type('application/javascript');
+                  fs.createReadStream('/home/k/vxl/objectize.js').pipe(res);
+                }
+                app.get('/archae/objects/objectize.js', serveObjectsObjectizeJs);
+                function serveObjectsObjectizeWasm(req, res, next) {
+                  res.type('application/octret-stream');
+                  fs.createReadStream('/home/k/vxl/objectize.wasm').pipe(res);
+                }
+                app.get('/archae/objects/objectize.wasm', serveObjectsObjectizeWasm);
+                function serveObjectsTemplates(req, res, next) {
+                  res.write(new Buffer(geometriesBuffer.buffer, geometriesBuffer.byteOffset, geometriesBuffer.byteLength));
+                  res.write(new Buffer(geometryTypes.buffer, geometryTypes.byteOffset, geometryTypes.byteLength));
+                  res.write(new Buffer(blockTypes.buffer, blockTypes.byteOffset, blockTypes.byteLength));
+                  res.write(new Buffer(transparentVoxels.buffer, transparentVoxels.byteOffset, transparentVoxels.byteLength));
+                  res.write(new Buffer(translucentVoxels.buffer, translucentVoxels.byteOffset, translucentVoxels.byteLength));
+                  res.write(new Buffer(faceUvs.buffer, faceUvs.byteOffset, faceUvs.byteLength));
+                  res.end();
+                }
+                app.get('/archae/objects/templates.dat', serveObjectsTemplates);
 
                 function serveObjectsChunks(req, res, next) {
                   const {query: {x: xs, z: zs}} = req;

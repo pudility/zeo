@@ -2,7 +2,7 @@ const path = require('path');
 
 const alea = require('alea-zeo');
 const indev = require('indev');
-const vxl = require('vxl');
+const vxl = require('/home/k/vxl');
 
 class RandomUtils {
   mount() {
